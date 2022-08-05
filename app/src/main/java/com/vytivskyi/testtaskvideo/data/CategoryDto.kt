@@ -2,9 +2,9 @@ package com.vytivskyi.testtaskvideo.data
 
 import com.google.gson.annotations.SerializedName
 
-data class Category(
+data class CategoryDto(
     @SerializedName("name")
     val name: String,
     @SerializedName("videos")
-    val videos: List<Video>
+    val videos: List<VideoDto>
 )

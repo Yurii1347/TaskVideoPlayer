@@ -2,7 +2,7 @@ package com.vytivskyi.testtaskvideo.data
 
 import com.google.gson.annotations.SerializedName
 
-data class Video(
+data class VideoDto(
     @SerializedName("description")
     val description: String,
     @SerializedName("sources")

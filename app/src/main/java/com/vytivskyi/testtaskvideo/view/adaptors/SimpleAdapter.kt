@@ -5,32 +5,31 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.vytivskyi.testtaskvideo.R
-import com.vytivskyi.testtaskvideo.data.Video
+import com.vytivskyi.testtaskvideo.data.VideoDto
 import com.vytivskyi.testtaskvideo.databinding.RecyclerViewItemBinding
+import com.vytivskyi.testtaskvideo.model.Video
 
-class SimpleAdapter() :
-    RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
+class SimpleAdapter : RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
     var mainL: List<Video> = emptyList()
         set(value) {
             field = value
             notifyDataSetChanged()
         }
-    var mItemClickListener: (position: Int) -> Unit = {}
 
+    var mItemClickListener: (position: Int) -> Unit = {}
 
     inner class ViewHolder(item: View) : RecyclerView.ViewHolder(item) {
         private val binding = RecyclerViewItemBinding.bind(item)
-        fun bind(video: Video?) = with(binding) {
-            tvTitle.text = video?.title
-            tvDescription.text = video?.description
-            tvCreator.text = video?.subtitle
+        fun bind(video: Video) = with(binding) {
+            tvTitle.text = video.title
+            tvDescription.text = video.description
+            tvCreator.text = video.subtitle
         }
 
         init {
             item.setOnClickListener {
                 mItemClickListener(absoluteAdapterPosition)
             }
-            setHasStableIds(true)
         }
     }
 
@@ -46,10 +45,6 @@ class SimpleAdapter() :
 
     override fun getItemCount(): Int {
         return mainL.size
-    }
-
-    override fun getItemId(position: Int): Long {
-        return mainL[position].hashCode().toLong()
     }
 
 }

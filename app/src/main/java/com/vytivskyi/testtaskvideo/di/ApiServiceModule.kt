@@ -12,11 +12,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class ApiServiceModule {
-    companion object {
-        private const val BASE_URL = "https://raw.githubusercontent.com/"
-    }
-
+object ApiServiceModule {
+    private const val BASE_URL = "https://raw.githubusercontent.com/"
     @Provides
     fun provideApiInterface(gson: Gson): ApiInterface {
         val retrofit = Retrofit.Builder()
@@ -25,7 +22,6 @@ abstract class ApiServiceModule {
             .build()
         return retrofit.create(ApiInterface::class.java)
     }
-
     @Provides
     fun provideGson(): Gson {
         return GsonBuilder()
