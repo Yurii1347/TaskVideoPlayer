@@ -1,19 +1,38 @@
 package com.vytivskyi.testtaskvideo.viewmodel
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.vytivskyi.testtaskvideo.data.Video
-import com.vytivskyi.testtaskvideo.model.repository.VideoRepository
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
+import androidx.lifecycle.viewModelScope
+import com.vytivskyi.testtaskvideo.model.Video
 import com.vytivskyi.testtaskvideo.model.repository.VideoRepositoryImpl
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class VideosVM {
-    private val mVideosRepository: VideoRepository = VideoRepositoryImpl()
+@HiltViewModel
+class VideosVM @Inject constructor(
+    private val mVideosRepository: VideoRepositoryImpl
+) : ViewModel() {
 
-    private val _videos = MutableLiveData<List<Video>?>()
-    val videos : LiveData<List<Video>?> = _videos
+    fun observeVideos(): LiveData<List<Video>> {
+        return mVideosRepository.observeVideos()
+            .map { list ->
+                list.map {
+                    Video(
+                        uid = it.uid,
+                        source = it.source,
+                        title = it.title,
+                        subtitle = it.subtitle,
+                        description = it.description,
+                    )
+                }
+            }
+    }
 
-    suspend fun getVideos() {
-        val result = mVideosRepository.getVideos()
-        _videos.postValue(result.body()?.categories?.get(0)?.videos)
+    fun fetchVideos() {
+        viewModelScope.launch {
+            mVideosRepository.fetchVideos()
+        }
     }
 }

@@ -5,33 +5,30 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.vytivskyi.testtaskvideo.R
-import com.vytivskyi.testtaskvideo.data.Video
+import com.vytivskyi.testtaskvideo.data.VideoDto
 import com.vytivskyi.testtaskvideo.databinding.RecyclerViewItemBinding
+import com.vytivskyi.testtaskvideo.model.Video
 
-class SimpleAdapter(private val mainL: List<Video>?, val mItemClickListener: ItemClickListener) :
-    RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
-
-    interface ItemClickListener {
-        fun onClick(position: Int?) {
+class SimpleAdapter : RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
+    var mainL: List<Video> = emptyList()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
         }
-    }
+
+    var mItemClickListener: (position: Int) -> Unit = {}
 
     inner class ViewHolder(item: View) : RecyclerView.ViewHolder(item) {
         private val binding = RecyclerViewItemBinding.bind(item)
-        fun bind(video: Video?) = with(binding) {
-            tvTitle.text = video?.title
-            tvDescription.text = video?.description
-            tvCreator.text = video?.subtitle
+        fun bind(video: Video) = with(binding) {
+            tvTitle.text = video.title
+            tvDescription.text = video.description
+            tvCreator.text = video.subtitle
         }
 
         init {
             item.setOnClickListener {
-                mainL?.get(absoluteAdapterPosition)
-                    .let { it ->
-                        if (it != null) {
-                            mItemClickListener.onClick(absoluteAdapterPosition)
-                        }
-                    }
+                mItemClickListener(absoluteAdapterPosition)
             }
         }
     }
@@ -43,12 +40,11 @@ class SimpleAdapter(private val mainL: List<Video>?, val mItemClickListener: Ite
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(mainL?.get(position))
+        holder.bind(mainL[position])
     }
 
     override fun getItemCount(): Int {
-        return mainL?.size ?: 0
+        return mainL.size
     }
-
 
 }
