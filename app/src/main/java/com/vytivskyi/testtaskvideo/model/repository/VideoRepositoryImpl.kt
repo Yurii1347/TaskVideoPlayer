@@ -1,17 +1,14 @@
 package com.vytivskyi.testtaskvideo.model.repository
 
 import com.vytivskyi.testtaskvideo.data.MainVideos
-import com.yurii.vytivskyi.trainingapp.model.APIs.ApiInterface
-import retrofit2.Response
+import com.vytivskyi.testtaskvideo.model.service.ApiInterface
+import javax.inject.Inject
 
-class VideoRepositoryImpl: VideoRepository {
-    private val apiInterface = ApiInterface.create()
+class VideoRepositoryImpl @Inject constructor(
+    private val apiInterface: ApiInterface
+) {
 
-    override suspend fun getVideos(): Response<MainVideos> {
-       return apiInterface.getVideos()
+    suspend fun getVideos(): Result<MainVideos> {
+        return runCatching { apiInterface.getVideos() }
     }
-
-
-
-
 }

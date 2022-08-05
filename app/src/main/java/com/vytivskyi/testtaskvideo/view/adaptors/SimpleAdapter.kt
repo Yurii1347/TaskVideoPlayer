@@ -8,13 +8,15 @@ import com.vytivskyi.testtaskvideo.R
 import com.vytivskyi.testtaskvideo.data.Video
 import com.vytivskyi.testtaskvideo.databinding.RecyclerViewItemBinding
 
-class SimpleAdapter(private val mainL: List<Video>?, val mItemClickListener: ItemClickListener) :
+class SimpleAdapter() :
     RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
-
-    interface ItemClickListener {
-        fun onClick(position: Int?) {
+    var mainL: List<Video> = emptyList()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
         }
-    }
+    var mItemClickListener: (position: Int) -> Unit = {}
+
 
     inner class ViewHolder(item: View) : RecyclerView.ViewHolder(item) {
         private val binding = RecyclerViewItemBinding.bind(item)
@@ -26,13 +28,9 @@ class SimpleAdapter(private val mainL: List<Video>?, val mItemClickListener: Ite
 
         init {
             item.setOnClickListener {
-                mainL?.get(absoluteAdapterPosition)
-                    .let { it ->
-                        if (it != null) {
-                            mItemClickListener.onClick(absoluteAdapterPosition)
-                        }
-                    }
+                mItemClickListener(absoluteAdapterPosition)
             }
+            setHasStableIds(true)
         }
     }
 
@@ -43,12 +41,15 @@ class SimpleAdapter(private val mainL: List<Video>?, val mItemClickListener: Ite
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(mainL?.get(position))
+        holder.bind(mainL[position])
     }
 
     override fun getItemCount(): Int {
-        return mainL?.size ?: 0
+        return mainL.size
     }
 
+    override fun getItemId(position: Int): Long {
+        return mainL[position].hashCode().toLong()
+    }
 
 }

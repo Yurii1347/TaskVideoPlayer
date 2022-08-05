@@ -2,48 +2,38 @@ package com.vytivskyi.testtaskvideo.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.vytivskyi.testtaskvideo.databinding.ActivityMainBinding
 import com.vytivskyi.testtaskvideo.view.adaptors.SimpleAdapter
 import com.vytivskyi.testtaskvideo.viewmodel.VideosVM
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
 
-class MainActivity : AppCompatActivity(), SimpleAdapter.ItemClickListener {
-
-    private val mViewModel: VideosVM = VideosVM()
-
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
+    private val mViewModel: VideosVM by viewModels()
+    private val simpleAdapter = SimpleAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        simpleAdapter.mItemClickListener = ::onClick
+        binding.recyclerView.adapter = simpleAdapter
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            mViewModel.getVideos()
-        }
 
         initObserver()
     }
 
     private fun initObserver() = with(binding) {
-        mViewModel.apply {
-            videos.observe(this@MainActivity) {
-                recyclerView.adapter =
-                    SimpleAdapter(
-                        it, this@MainActivity
-                    )
-                Log.d("lol", it?.size.toString())
-                recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
-            }
+        mViewModel.videos.observe(this@MainActivity) {
+            simpleAdapter.mainL = it
         }
     }
 
-    override fun onClick(position: Int?) {
+    private fun onClick(position: Int?) {
         val i = Intent(this@MainActivity, VideoActivity::class.java)
         i.putExtra("position", position)
         startActivity(i)
