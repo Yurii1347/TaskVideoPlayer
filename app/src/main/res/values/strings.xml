@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TestTaskVideo</string>
+
+
+    <string name="mp4">http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4</string>
+
+
+</resources>
