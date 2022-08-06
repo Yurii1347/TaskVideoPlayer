@@ -1,24 +1,28 @@
 package com.vytivskyi.testtaskvideo.view
 
 import android.os.Bundle
-import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
+import androidx.core.view.isVisible
+import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.vytivskyi.testtaskvideo.databinding.ActivityVideoBinding
 import com.vytivskyi.testtaskvideo.viewmodel.VideosVM
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class VideoActivity : AppCompatActivity(), Player.Listener {
 
-    private lateinit var player: ExoPlayer
+    private lateinit var binding: ActivityVideoBinding
+
     private val mViewModel: VideosVM by viewModels()
 
-    private lateinit var binding: ActivityVideoBinding
+    @Inject
+    lateinit var player: ExoPlayer
+
+    @Inject
+    lateinit var playerNotificationManager: PlayerNotificationManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,22 +31,24 @@ class VideoActivity : AppCompatActivity(), Player.Listener {
 
         val position = intent.getIntExtra(MainActivity.KEY_POSITION, 0)
 
-        setupPlayer()
         addMp4Files(position)
-    }
 
-    private fun setupPlayer() {
-        player = ExoPlayer.Builder(this).build()
         binding.videoView.player = player
         player.addListener(this)
+        playerNotificationManager.setPlayer(player)
     }
 
     private fun addMp4Files(position: Int) {
         mViewModel.observeVideos().observe(this@VideoActivity) { listVideo ->
-            player.addMediaItems(listVideo.map {
+            player.addMediaItems(listVideo.map { video ->
                 MediaItem.Builder()
-                    .setUri(it.source)
-                    .setMediaId(it.uid.toString())
+                    .setUri(video.source)
+                    .setMediaId(video.uid.toString())
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setTitle(video.title)
+                            .build()
+                    )
                     .build()
             })
             player.seekTo(position, C.INDEX_UNSET.toLong())
@@ -51,16 +57,9 @@ class VideoActivity : AppCompatActivity(), Player.Listener {
         }
     }
 
-    override fun onPlaybackStateChanged(playbackState: Int) {
-        super.onPlaybackStateChanged(playbackState)
-        when (playbackState) {
-            Player.STATE_BUFFERING -> {
-                binding.progressBar.visibility = View.VISIBLE
-            }
-            else -> {
-                binding.progressBar.visibility = View.INVISIBLE
-            }
-        }
+    override fun onIsLoadingChanged(isLoading: Boolean) {
+        super.onIsLoadingChanged(isLoading)
+        binding.progressBar.isVisible = isLoading
     }
 
     override fun onBackPressed() {
@@ -69,8 +68,18 @@ class VideoActivity : AppCompatActivity(), Player.Listener {
         player.stop()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        player.stop()
+        binding.videoView.player = null
+        playerNotificationManager.setPlayer(null)
+    }
+
     override fun onStop() {
         super.onStop()
-        player.release()
+        player.pause()
     }
+
 }
+
+
